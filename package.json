@@ -1,0 +1,21 @@
+{
+    "name": "bite-sized-trading",
+    "version": "1.0.0",
+    "description": "A trading education platform with bite-sized lessons",
+    "private": true,
+    "workspaces": [
+      "mobile",
+      "backend",
+      "shared"
+    ],
+    "scripts": {
+      "dev:mobile": "npm run dev --workspace=mobile",
+      "dev:backend": "npm run dev --workspace=backend",
+      "build:mobile": "npm run build --workspace=mobile",
+      "build:backend": "npm run build --workspace=backend",
+      "test": "npm run test --workspaces --if-present",
+      "lint": "npm run lint --workspaces --if-present"
+    },
+    "author": "",
+    "license": "MIT"
+  }
