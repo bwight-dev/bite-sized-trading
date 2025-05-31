@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import prisma from './db';
 
 const app = express();
 
@@ -12,8 +13,13 @@ app.use(morgan('dev'));
 app.use(express.json());
 
 // Health check endpoint
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok' });
+app.get('/health', async (req: Request, res: Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ status: 'ok' });
+  } catch (error) {
+    res.status(500).json({ error: 'Database connection failed' });
+  }
 });
 
 // 404 handler

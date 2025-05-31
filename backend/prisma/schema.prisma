@@ -1,0 +1,62 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                String               @id @default(uuid())
+  email             String               @unique
+  name              String
+  createdAt         DateTime             @default(now())
+  ebooks            Ebook[]
+  userCardCompletions UserCardCompletion[]
+  userProgress      UserProgress?
+}
+
+model Ebook {
+  id            String   @id @default(uuid())
+  userId        String
+  filename      String
+  status        String
+  extractedText String?
+  createdAt     DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id])
+  cards         Card[]
+}
+
+model Card {
+  id              String               @id @default(uuid())
+  title           String
+  content         String
+  question        String
+  options         String[]
+  correctAnswer   Int
+  category        String
+  difficulty      String
+  ebookId         String
+  ebook           Ebook                @relation(fields: [ebookId], references: [id])
+  userCardCompletions UserCardCompletion[]
+}
+
+model UserCardCompletion {
+  id          String   @id @default(uuid())
+  userId      String
+  cardId      String
+  isCorrect   Boolean
+  completedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  card        Card     @relation(fields: [cardId], references: [id])
+}
+
+model UserProgress {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  currentStreak     Int      @default(0)
+  totalCompleted    Int      @default(0)
+  lastActiveDate    DateTime @default(now())
+  user              User     @relation(fields: [userId], references: [id])
+}
