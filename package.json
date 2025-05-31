@@ -1,0 +1,44 @@
+{
+  "name": "bite-sized-trading",
+  "version": "1.0.0",
+  "description": "A React Native trading education app with bite-sized lessons",
+  "private": true,
+  "workspaces": [
+    "mobile",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:mobile": "npm run start --workspace=mobile",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build:mobile": "npm run build --workspace=mobile",
+    "build:backend": "npm run build --workspace=backend",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces && rm -rf node_modules",
+    "install:all": "npm install && npm install --workspaces"
+  },
+  "keywords": [
+    "trading",
+    "education",
+    "react-native",
+    "expo",
+    "finance",
+    "learning"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/bite-sized-trading.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/bite-sized-trading/issues"
+  },
+  "homepage": "https://github.com/your-username/bite-sized-trading#readme"
+}
