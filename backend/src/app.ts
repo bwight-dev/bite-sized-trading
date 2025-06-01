@@ -4,9 +4,14 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import prisma from './db';
 import contentRoutes from './routes/content';
+import ebookRoutes from './routes/ebookRoutes';
 import { authMiddleware } from './middleware/auth';
+import { ensureUploadsDirectory } from './utils/fileUtils';
 
 const app = express();
+
+// Ensure uploads directory exists
+ensureUploadsDirectory();
 
 // Middleware
 app.use(cors());
@@ -26,6 +31,9 @@ app.get('/health', async (req: Request, res: Response) => {
 
 // Content routes with authentication
 app.use('/content', authMiddleware, contentRoutes);
+
+// Ebook routes
+app.use('/ebooks', ebookRoutes);
 
 // 404 handler
 app.use((req: Request, res: Response, next: NextFunction) => {
