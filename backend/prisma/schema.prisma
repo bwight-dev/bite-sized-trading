@@ -21,7 +21,7 @@ model Ebook {
   id            String   @id @default(uuid())
   userId        String
   filename      String
-  status        String   // UPLOADED, PROCESSING, COMPLETED, ERROR
+  status        String   // UPLOADED, PROCESSING, GENERATING_CARDS, COMPLETED, ERROR
   extractedText String?  @db.Text
   metadata      Json?    // Store PDF metadata (pageCount, title, author, etc.)
   error         String?  @db.Text // Store error message if processing fails
