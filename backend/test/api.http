@@ -1,0 +1,20 @@
+ ### Get a paginated list of content cards
+GET http://localhost:4000/content/cards?page=1&limit=10
+X-User-Id: user123
+
+### Get a paginated list of content cards with filtering
+GET http://localhost:4000/content/cards?page=1&limit=10&category=Basics&difficulty=Easy
+X-User-Id: user123
+
+### Mark a card as completed (replace :id with an actual card ID)
+POST http://localhost:4000/content/cards/:id/complete
+Content-Type: application/json
+X-User-Id: user123
+
+{
+  "isCorrect": true
+}
+
+### Get user progress
+GET http://localhost:4000/user/progress
+X-User-Id: user123
