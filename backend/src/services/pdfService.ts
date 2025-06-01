@@ -16,21 +16,50 @@ interface PDFMetadata {
 
 export class PDFService {
   private static readonly CHUNK_SIZE = 800; // Target words per chunk
+  private static readonly MIN_TEXT_LENGTH = 100; // Minimum text length for validation
+  private static readonly MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
   static async extractTextFromPDF(filePath: string): Promise<{ text: string; metadata: PDFMetadata }> {
     try {
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        throw new Error('PDF file not found');
+      }
+
+      // Check file size
+      const stats = fs.statSync(filePath);
+      if (stats.size > this.MAX_FILE_SIZE) {
+        throw new Error('PDF file size exceeds maximum limit of 10MB');
+      }
+
       const dataBuffer = fs.readFileSync(filePath);
       const data = await pdfParse(dataBuffer);
+      
+      // Validate extracted data
+      if (!data.text || typeof data.text !== 'string') {
+        throw new Error('Failed to extract text from PDF');
+      }
+
+      if (!data.numpages || data.numpages < 1) {
+        throw new Error('Invalid PDF: No pages found');
+      }
       
       return {
         text: data.text,
         metadata: {
           pageCount: data.numpages,
-          info: data.info
+          info: {
+            Title: data.info.Title,
+            Author: data.info.Author,
+            CreationDate: data.info.CreationDate
+          }
         }
       };
     } catch (error) {
       console.error('Error extracting text from PDF:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
       throw new Error('Failed to extract text from PDF');
     }
   }
@@ -38,9 +67,15 @@ export class PDFService {
   static validatePDFContent(text: string): boolean {
     // Basic validation - ensure we have meaningful content
     const trimmedText = text.trim();
-    if (trimmedText.length < 100) {
+    if (trimmedText.length < this.MIN_TEXT_LENGTH) {
       throw new Error('PDF appears to be empty or contains insufficient text');
     }
+
+    // Check for common PDF extraction issues
+    if (trimmedText.includes('') || trimmedText.includes('')) {
+      throw new Error('PDF contains invalid characters, may be corrupted or password protected');
+    }
+
     return true;
   }
 
@@ -49,6 +84,7 @@ export class PDFService {
     const cleanedText = text
       .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
       .replace(/\n+/g, ' ')  // Replace newlines with space
+      .replace(/[^\S\r\n]+/g, ' ') // Replace all whitespace with single space
       .trim();
 
     // Split into sentences (basic implementation)
@@ -92,7 +128,10 @@ export class PDFService {
       // Update status to PROCESSING
       await prisma.ebook.update({
         where: { id: ebookId },
-        data: { status: 'PROCESSING' }
+        data: { 
+          status: 'PROCESSING',
+          error: null // Clear any previous errors
+        }
       });
 
       const filePath = path.join(process.cwd(), 'uploads', ebook.filename);
@@ -112,7 +151,7 @@ export class PDFService {
         data: {
           status: 'COMPLETED',
           extractedText: text,
-          metadata: metadata
+          metadata: metadata as any // Type assertion needed due to Prisma's JSON type
         }
       });
 

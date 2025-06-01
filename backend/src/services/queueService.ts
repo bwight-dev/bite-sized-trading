@@ -1,5 +1,6 @@
 import Queue from 'bull';
 import { PDFService } from './pdfService';
+import { cleanupStuckJobs, getQueueStats } from '../utils/queueUtils';
 
 // Create a new queue for PDF processing
 const pdfProcessingQueue = new Queue('pdf-processing', {
@@ -30,6 +31,9 @@ pdfProcessingQueue.on('failed', (job, error) => {
   console.error(`Job ${job?.id} failed for ebook ${job?.data.ebookId}:`, error);
 });
 
+// Clean up stuck jobs every 5 minutes
+setInterval(cleanupStuckJobs, 5 * 60 * 1000);
+
 export const addPDFProcessingJob = async (ebookId: string) => {
   const job = await pdfProcessingQueue.add(
     { ebookId },
@@ -40,6 +44,7 @@ export const addPDFProcessingJob = async (ebookId: string) => {
         delay: 5000,
       },
       removeOnComplete: true,
+      timeout: 30 * 60 * 1000, // 30 minutes timeout
     }
   );
   
@@ -64,4 +69,8 @@ export const getJobStatus = async (jobId: string) => {
     result,
     error,
   };
+};
+
+export const getQueueStatus = async () => {
+  return getQueueStats(pdfProcessingQueue);
 }; 

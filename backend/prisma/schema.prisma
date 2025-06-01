@@ -21,13 +21,17 @@ model Ebook {
   id            String   @id @default(uuid())
   userId        String
   filename      String
-  status        String
+  status        String   // UPLOADED, PROCESSING, COMPLETED, ERROR
   extractedText String?  @db.Text
-  metadata      Json?
-  error         String?
+  metadata      Json?    // Store PDF metadata (pageCount, title, author, etc.)
+  error         String?  @db.Text // Store error message if processing fails
   createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   user          User     @relation(fields: [userId], references: [id])
   cards         Card[]
+
+  @@index([userId])
+  @@index([status])
 }
 
 model Card {
